@@ -38,7 +38,3 @@ def get_database_config():
     }
 
     return config
-
-
-config = get_database_config()
-print(config)
