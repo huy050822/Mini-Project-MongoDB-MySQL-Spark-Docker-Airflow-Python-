@@ -11,15 +11,9 @@ def main(config):
     logger.info("Starting application")
     
     #Connect MySQL
-    mysql = MySQLConnect(config["mysql"].host, config["mysql"].port, config["mysql"].user, config["mysql"].password, config["mysql"].database)
-    con, cursor = mysql.connector()
-    if not con:
-        logger.error("Database connection failed")
-        return
-    logger.info("Database connection OK")
-    mysql.close()
-
-
+    with MySQLConnect(config["mysql"].host, config["mysql"].port, config["mysql"].user, config["mysql"].password, config["mysql"].database) as Mysql_client:
+        Mysql_client.connector()
+    
 
 if __name__ == "__main__":
     set_up_logging() 
