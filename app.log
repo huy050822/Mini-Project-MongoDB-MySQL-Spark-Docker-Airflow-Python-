@@ -1,0 +1,24 @@
+2025-12-28 13:44:18,643 INFO root: Logging initialized
+2025-12-28 13:44:18,645 INFO __main__: Starting application
+2025-12-28 13:44:18,645 INFO databases.mysql_connect: Connecting to MySQL
+2025-12-28 13:44:22,739 ERROR databases.mysql_connect: Fail to connect MySQL
+Traceback (most recent call last):
+  File "c:\Users\Admin\anaconda3\envs\miniproject1\lib\site-packages\mysql\connector\connection_cext.py", line 323, in _open_connection
+    self._cmysql.connect(**cnx_kwargs)
+_mysql_connector.MySQLInterfaceError: Can't connect to MySQL server on 'localhost:3036' (10061)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Mini Project 1\databases\mysql_connect.py", line 35, in connector
+    self.connection = mysql.connector.connect(**self.config)
+  File "c:\Users\Admin\anaconda3\envs\miniproject1\lib\site-packages\mysql\connector\pooling.py", line 322, in connect
+    return CMySQLConnection(*args, **kwargs)
+  File "c:\Users\Admin\anaconda3\envs\miniproject1\lib\site-packages\mysql\connector\connection_cext.py", line 140, in __init__
+    self.connect(**kwargs)
+  File "c:\Users\Admin\anaconda3\envs\miniproject1\lib\site-packages\mysql\connector\abstracts.py", line 1363, in connect
+    self._open_connection()
+  File "c:\Users\Admin\anaconda3\envs\miniproject1\lib\site-packages\mysql\connector\connection_cext.py", line 328, in _open_connection
+    raise get_mysql_exception(
+mysql.connector.errors.DatabaseError: 2003 (HY000): Can't connect to MySQL server on 'localhost:3036' (10061)
+2025-12-28 13:44:22,745 ERROR __main__: Database connection failed
