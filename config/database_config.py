@@ -20,7 +20,11 @@ class Mysql_Config():
     user : str
     password : str
     database : str
-    
+
+@dataclass
+class Mongodb_Config():
+    uri : str
+    database : str
 
 def get_database_config():
     # read data from .env file
@@ -34,7 +38,10 @@ def get_database_config():
             password = os.getenv("MYSQL_PASSWORD"),
             database = os.getenv("MYSQL_DATABASE")
         ),
-        "mongodb" : ""
+        "mongodb" : Mongodb_Config(
+            uri = os.getenv("MONGODB_URI"),
+            database = os.getenv("MONGODB_DATABASE")
+        )
     }
 
     return config
