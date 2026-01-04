@@ -29,10 +29,14 @@ class MySQLConnect:
     
     #Connect to MySQL
     def connector(self):
-        self.connection = mysql.connector.connect(**self.config)
-        self.cursor = self.connection.cursor()
-        return self.connection, self.cursor
-    
+        try:
+            logger.info("Connecting to MySQL")
+            self.connection = mysql.connector.connect(**self.config)
+            self.cursor = self.connection.cursor()
+            logger.info("MySQL was connected successfully")
+            return self.connection, self.cursor
+        except Exception:
+            logger.error("MySQL connection failed", exc_info=True)
     def close(self):
         try:
             #Close cursor
@@ -50,20 +54,11 @@ class MySQLConnect:
             logger.error("Fail to close", exc_info= True)
         
     def __enter__(self):
-        try:
-            logger.info("Connecting to MySQL")
-            self.connector()
-            logger.info("MySQL was connected successfully")
-            return self
-        except Exception:
-            #Show logging (error)
-            logger.error("Fail to connect MySQL", exc_info= True)
-            
-
+        return self
+       
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
         return False
-
 
 

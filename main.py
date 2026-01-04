@@ -14,7 +14,8 @@ def main(config):
     #Connect MySQL
     with MySQLConnect(config["mysql"].host, config["mysql"].port, config["mysql"].user, config["mysql"].password, config["mysql"].database) as Mysql_client:
         Mysql_client.connector()
-    logger.info("AFTER MYSQL")
+    
+    logger.info("Next Database")
     #Connect MongoDB
     with MongoDB_connect(config["mongodb"].uri, config["mongodb"].database) as MongoDB_client:
         MongoDB_client.connector()
