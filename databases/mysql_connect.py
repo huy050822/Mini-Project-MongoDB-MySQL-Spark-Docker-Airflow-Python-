@@ -1,9 +1,9 @@
 import mysql.connector
-import logging
+from config.logging_config import get_logger
 
 
 #Get logger 
-logger = logging.getLogger(__name__)
+logger = get_logger("mysql_connect", "dtb")
 
 # Set up MYSQL connect
 class MySQLConnect:
@@ -55,8 +55,6 @@ class MySQLConnect:
         
     def __enter__(self):
         return self
-       
-
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
         return False

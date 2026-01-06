@@ -1,20 +1,24 @@
-import logging
 from pymongo import MongoClient
+from config.logging_config import get_logger
 
 #Get logger
-logger = logging.getLogger(__name__)
+logger = get_logger("mongodb.connect", "dtb")
+
 
 #Set up MongoDB
 class MongoDB_connect():
+    #Init Function
     def __init__(self, mongo_uri, database):
         self.mongo_uri = mongo_uri
         self.database = database
         self.client = None
         self.db = None
-
+    
+    #Repr Function
     def __repr__(self):
         return f"MongoDB(mongo_uri{self.mongo_uri}, database{self.database})"
     
+    #Connect to mongodb
     def connector(self):
         try:
             logger.info("Connecting to MongoDB")
