@@ -1,6 +1,6 @@
-version: "3.9"
+version: "3.9" #Finnest version at this moment
 services:
-  workflow:
+  workflow: #Waiting build the backend (maybe interface web)
     build: .
     container_name: workflow_data
     ports:
@@ -21,9 +21,9 @@ services:
     image: mysql/mysql-server:latest
     container_name: mysql2
     ports:
-      - "3307:3306"
+      - "3307:3306" 
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD} #Everything in .env
       MYSQL_DATABASE: ${MYSQL_DATABASE}
     volumes:
       - .docker/init.sql:/docker-entrypoint-initdb.d/init.sql #Run init.sql debug connect mysql wrong port
