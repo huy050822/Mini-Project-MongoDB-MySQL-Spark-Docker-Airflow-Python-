@@ -2,7 +2,7 @@ from pymongo import MongoClient
 from config.logging_config import get_logger
 
 #Get logger
-logger = get_logger("mongodb.connect", "dtb")
+logger = get_logger("mongodb.connect", "dtb.log")
 
 
 #Set up MongoDB
@@ -29,7 +29,7 @@ class MongoDB_connect():
             self.client.admin.command("ping")
             self.db = self.client[self.database]
             logger.info(f"MongoDB was connected successfully to database: {self.database}")
-        
+            return self.client
         except Exception as e:
             logger.error("Fail to connect MongoDB", exc_info=True)
             raise RuntimeError("MongoDB connection failed") from e
@@ -48,4 +48,5 @@ class MongoDB_connect():
         return self  
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
+        if self.client:
+            self.close()

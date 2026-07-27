@@ -25,6 +25,8 @@ class Mysql_Config():
 class Mongodb_Config():
     uri : str
     database : str
+    host : str
+    port : int
 
 def get_database_config():
     # read data from .env file
@@ -40,7 +42,9 @@ def get_database_config():
         ),
         "mongodb" : Mongodb_Config(
             uri = os.getenv("MONGODB_URI"),
-            database = os.getenv("MONGODB_DATABASE")
+            database = os.getenv("MONGODB_DATABASE"),
+            host = os.getenv("MONGODB_HOST"),
+            port = os.getenv("MONGODB_PORT")
         )
     }
 

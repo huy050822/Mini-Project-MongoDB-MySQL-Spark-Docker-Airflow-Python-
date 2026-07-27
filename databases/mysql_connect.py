@@ -3,7 +3,7 @@ from config.logging_config import get_logger
 
 
 #Get logger 
-logger = get_logger("mysql_connect", "dtb")
+logger = get_logger("mysql_connect", "dtb.log")
 
 # Set up MYSQL connect
 class MySQLConnect:
