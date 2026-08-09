@@ -10,24 +10,51 @@ class Spark_Write_MySql:
         self.spark = spark
         self.mysql_config = mysql_config
 
-    def spark_write_mysql(self, df_to_write: DataFrame, mysql_table: str, mode : str):
+    def spark_write_mysql(self, df_to_write: DataFrame, mysql_table: str, mode : str, primary_key: str = "id"):
         cfg = self.mysql_config
         #Use dataclass so notice about cfg.host not cfg["host"]
-        jdbc_url = f"jdbc:mysql://{cfg.host}:{cfg.port}/{cfg.database}" 
+        jdbc_url = f"jdbc:mysql://{cfg.host}:{cfg.port}/{cfg.database}?rewriteBatchedStatements=true"
 
         #Config 
-        logger1.info("Spark starting write to Mysql")
-        df_to_write.write \
-        .format("jdbc")\
-        .mode(mode) \
-        .option("driver", "com.mysql.cj.jdbc.Driver") \
-        .option("url", jdbc_url) \
-        .option("dbtable", mysql_table) \
-        .option("user", cfg.user) \
-        .option("password", cfg.password)\
-        .save()
+        logger1.info(f"Spark starting write to Mysql {mysql_table}")
+        try:
+            query = f"(SELECT CAST({primary_key} AS SIGNED) AS {primary_key} FROM {mysql_table}) AS temp"
+            if mode == "append":
+                
+                existed_id = df_to_write.write \
+                .format("jdbc")\
+                .mode(mode) \
+                .option("driver", "com.mysql.cj.jdbc.Driver") \
+                .option("url", jdbc_url) \
+                .option("dbtable", query)\
+                .option("user", cfg.user) \
+                .option("password", cfg.password)\
+                .save()
+
+                df_to_write = df_to_write.withColumn(primary_key, df_to_write[primary_key].cast("long"))
+                
+                df_to_write = df_to_write.join(existed_id, on=primary_key, how="left_anti")
+
+                logger1.info(f"Filtered out existing IDs from MySQL for table: {mysql_table}")
+        except Exception as e:
+            logger1.warning(
+            f"Could not read existing IDs from {mysql_table} (table might be"f" empty or new): {e}")
+
+        try:
+            df_to_write.write \
+            .format("jdbc") \
+            .mode(mode)\
+            .option("driver", "com.mysql.cj.jdbc.Driver")\
+            .option("url", jdbc_url)\
+            .option("dbtable", mysql_table)\
+            .option("user", cfg.user) \
+            .option("password", cfg.password)\
+            .save()
+            logger1.info("Spark wrote to Mysql successfully")
+        except Exception as e:
+            logger1.error(f"Failed to write data to Mysql {str(e)}")
+            raise e
         
-        logger1.info("Spark wrote to Mysql successfully")
 
 class Spark_Write_Mongodb:
     def __init__(self, spark:SparkSession, mongodb_config: Dict):

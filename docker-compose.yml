@@ -1,15 +1,51 @@
-version: "3.9" #Finnest version at this moment
+version: "3.9"
+
+x-airflow-common: &airflow-common
+  build: .
+  env_file:
+    - .env
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    JAVA_HOME: '/usr/lib/jvm/default-java'
+    PYTHONPATH: '/opt/airflow' 
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/logs:/opt/airflow/logs
+    - ./airflow/plugins:/opt/airflow/plugins
+    - ./src:/opt/airflow/src
+    - ./config:/opt/airflow/config
+    - ./data:/opt/airflow/data
+  depends_on:
+    airflow-postgres:
+      condition: service_healthy
+
 services:
-  workflow: #Waiting build the backend (maybe interface web)
+  # --- APPS & DATABASES CỦA BẠN ---
+  workflow:
     build: .
     container_name: workflow_data
     ports:
       - "8000:8000"
     env_file:
-      - ./.env
+      - .env
     depends_on:
       - mongodb
       - mysql
+
+  superset:
+    build:
+      context: .
+      dockerfile: Dockerfile-superset
+    container_name: superset
+    ports:
+      - "8088:8088"
+    environment:
+      - SUPERSET_SECRET_KEY=your_secret_key_here
+
   mongodb:
     image: mongo:7
     container_name: mongodb
@@ -17,17 +53,61 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+
   mysql:
     image: mysql/mysql-server:latest
     container_name: mysql2
     ports:
       - "3307:3306" 
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD} #Everything in .env
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
     volumes:
-      - .docker/init.sql:/docker-entrypoint-initdb.d/init.sql #Run init.sql debug connect mysql wrong port
-      - ./data/mysql:/var/lib/mysql 
+      - .docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql
+
+  airflow-postgres:
+    image: postgres:13
+    container_name: airflow_postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow_webserver
+    command: webserver
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow_scheduler
+    command: scheduler
+
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow_init
+    command: version
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
+      _AIRFLOW_DB_MIGRATE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: admin
+      _AIRFLOW_WWW_USER_PASSWORD: admin
+
 volumes:
   mongodb_data:
   mysql_data:

@@ -5,25 +5,11 @@ from pyspark.sql import *
 
 logger1 = get_logger("Spark_read_from_Mongodb", "spark_read.log")
 logger2 = get_logger("Spark_read_from_json", "spark_read.log")
-class Spark_reader:
+class Spark_Read_Mongodb:
     def __init__(self, spark:SparkSession, mongodb_config : Dict):
 
         self.spark = spark
         self.mongodb_config = mongodb_config
-
-    def spark_read_json(self, file : str):
-        if not os.path.exists(file):
-            logger2.error(f"Not found file {file}")
-            raise FileNotFoundError
-        
-        try:
-            df = self.spark.read.json(file)
-            logger2.info(f"Spark read {file} completely")
-            return df
-        except Exception as e:
-            logger2.info(f"Error reading JSON file {file} with Spark: {str(e)}")
-            raise e 
-
 
     def spark_read_mongodb(self, collection_name = str ):
 
@@ -37,7 +23,7 @@ class Spark_reader:
 
 
         logger1.info("Spark starting read Mongodb")
-        self.spark.read\
+        read = self.spark.read\
             .format("mongodb") \
             .option("connection.uri", mongo_uri)\
             .option("database", config.database)\
@@ -45,6 +31,8 @@ class Spark_reader:
             .load()
 
         logger1.info("Spark read from Mongodb successfully")
+
+        return  read
         
         
         
