@@ -57,7 +57,11 @@ class ETL_pipeline:
 
             #Clean data raw (staying in mongodb)
             logger.info("Get data from Mongodb & Processing raw data")
-            df_actors, df_repos, df_orgs, df_events = self.cleaner.clean_data(df_file_raw)
+            df_mongo_raw = self.mongodb_read.spark_read_mongodb(
+                collection_name=mongo_collection
+            )
+            logger.info("Processing raw data from MongoDB")
+            df_actors, df_repos, df_orgs, df_events = self.cleaner.clean_data(df_mongo_raw)
 
 
             # df_clean.show(10)
